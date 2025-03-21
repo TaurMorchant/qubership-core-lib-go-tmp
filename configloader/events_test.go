@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -69,9 +70,12 @@ func TestNotifyWhenNoSubscribers(t *testing.T) {
 	defer cleanupSubscribersRegistry(t)
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
-	t.Logf("VLLA TestNotifyWhenNoSubscribers events count %v", subscribers.eventsCounter)
-
-	t.Logf("VLLA TestNotifyWhenNoSubscribers events count AFTER %v", subscribers.eventsCounter)
+	t.Logf("VLLA TestNotifyWhenNoSubscribers events count %v", subscribers.eventsCounter.Load())
+	for subscribers.eventsCounter.Load() > 0 {
+		t.Logf("sleep")
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Logf("VLLA TestNotifyWhenNoSubscribers events count AFTER %v", subscribers.eventsCounter.Load())
 	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 
@@ -127,7 +131,7 @@ func TestDataAtEventParamIsPossible(t *testing.T) {
 		return nil
 	}
 
-	t.Logf("VLLA TestDataAtEventParamIsPossible events count %v", subscribers.eventsCounter)
+	t.Logf("VLLA TestDataAtEventParamIsPossible events count %v", subscribers.eventsCounter.Load())
 
 	_, err := Subscribe(handlerF)
 	assert.Nil(t, err)

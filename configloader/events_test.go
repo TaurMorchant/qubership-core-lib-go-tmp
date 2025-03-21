@@ -69,6 +69,7 @@ func TestNotifyWhenNoSubscribers(t *testing.T) {
 	defer cleanupSubscribersRegistry(t)
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
+	<-subscribers.notifyCh
 	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 

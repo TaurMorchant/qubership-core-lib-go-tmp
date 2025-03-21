@@ -6,7 +6,6 @@ import (
 	"os"
 	"sync"
 	"testing"
-	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -70,7 +69,6 @@ func TestNotifyWhenNoSubscribers(t *testing.T) {
 	defer cleanupSubscribersRegistry(t)
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
-	time.Sleep(time.Second)
 	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 

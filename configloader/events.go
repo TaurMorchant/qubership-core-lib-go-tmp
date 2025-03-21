@@ -3,6 +3,7 @@ package configloader
 import (
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -83,9 +84,11 @@ func (s *subscribersRegistry) notify(e Event) {
 func (s *subscribersRegistry) spawnListener() {
 	go func() {
 		for event := range s.notifyCh {
+			log.Println("get event ", event)
 			for _, handlerF := range s.regCopy() {
 				_ = handlerF(event)
 			}
+			log.Println("event handled ", event)
 		}
 	}()
 }

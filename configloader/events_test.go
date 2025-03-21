@@ -12,15 +12,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func cleanupSubscribersRegistry() {
-	subscribers.Lock()
-	for k := range subscribers.registry {
-		delete(subscribers.registry, k)
-	}
-	subscribers.Unlock()
-}
-
-func cleanupSubscribersRegistry2(t *testing.T) {
+func cleanupSubscribersRegistry(t *testing.T) {
 	t.Logf("cleanupSubscribersRegistry2 start")
 	subscribers.Lock()
 	for k := range subscribers.registry {
@@ -31,7 +23,7 @@ func cleanupSubscribersRegistry2(t *testing.T) {
 }
 
 func TestSubscribe_OnInitEvent(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	var gotEvent1, gotEvent2 Event
 	over1, over2 := make(chan struct{}), make(chan struct{})
 	id1, err := Subscribe(func(e Event) error {
@@ -56,7 +48,7 @@ func TestSubscribe_OnInitEvent(t *testing.T) {
 }
 
 func TestUnsubscribeOnExistentHandler(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	id, err := Subscribe(func(Event) error { return nil })
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id.name)
@@ -66,7 +58,7 @@ func TestUnsubscribeOnExistentHandler(t *testing.T) {
 }
 
 func TestUnsubscribeOnNonExistentHandler(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	err := Unsubscribe(SubscriptionId{name: "non-existent"})
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrCannotFindSubscriber, err)
@@ -74,14 +66,14 @@ func TestUnsubscribeOnNonExistentHandler(t *testing.T) {
 
 func TestNotifyWhenNoSubscribers(t *testing.T) {
 	t.Logf("TestNotifyWhenNoSubscribers start")
-	defer cleanupSubscribersRegistry2(t)
+	defer cleanupSubscribersRegistry(t)
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
 	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 
 func TestNotifyNotConflictsWithUnSubscribe(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	// concurrent read test
 
 	assert.NotPanics(t, func() {
@@ -111,7 +103,7 @@ func TestNotifyNotConflictsWithUnSubscribe(t *testing.T) {
 }
 
 func TestDataAtEventParamIsPossible(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 
 	var notImplementedEventT EventT = -1
 	type dataCorrespondsToNotImplementedEventT struct {
@@ -139,7 +131,7 @@ func TestDataAtEventParamIsPossible(t *testing.T) {
 }
 
 func TestSubscribeRace(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	handler := func(e Event) error {
 		return nil
 	}

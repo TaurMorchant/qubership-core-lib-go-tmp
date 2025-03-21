@@ -35,4 +35,5 @@ jobs:
         args: >
           -Dsonar.projectKey=TaurMorchant_qubership-core-lib-go-tmp
           -Dsonar.organization=vladislav-larkin-test-organization
+          -Ssonar.host.url=https://sonarcloud.io
           -Dsonar.go.coverage.reportPaths=coverage.out

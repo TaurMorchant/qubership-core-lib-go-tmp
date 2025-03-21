@@ -17,20 +17,20 @@ import (
 var testParams = YamlPropertySourceParams{ConfigFilePath: "./testdata/application.yaml"}
 
 func TestInit_WithEnvironmentSource(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	os.Setenv("ENV_PROPERTY_SOURCE", "env")
 	Init(EnvPropertySource())
 	assert.Equal(t, "env", GetKoanf().Get("env.property.source"))
 }
 
 func TestInit_WithYamlSource(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	Init(YamlPropertySource(testParams))
 	assert.Equal(t, "yaml", GetKoanf().Get("test.var"))
 }
 
 func TestInit_TestBaseSources(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	os.Setenv("TEST_VAR", "env")
 	InitWithSourcesArray(BasePropertySources(testParams))
 	assert.Equal(t, "env", configInstance.konf.Get("test.var"))
@@ -38,7 +38,7 @@ func TestInit_TestBaseSources(t *testing.T) {
 }
 
 func TestGetOrDefault_GetRealValue(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	Init(YamlPropertySource(testParams))
 	rawKoanfData := GetOrDefault("slice.var", []string{"test"}).([]interface{})
 	var testSlice []string
@@ -53,7 +53,7 @@ func TestGetOrDefault_GetRealValue(t *testing.T) {
 }
 
 func TestGetOrDefault_GetDefaultValue(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	Init(YamlPropertySource(testParams))
 	testSlice := GetOrDefault("nonexistent.var", []string{"test"}).([]string)
 	assert.Equal(t, 1, len(testSlice))
@@ -61,7 +61,7 @@ func TestGetOrDefault_GetDefaultValue(t *testing.T) {
 }
 
 func TestGetOrDefaultString_GetRealValue(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	realString := "actualString"
 	os.Setenv("ENV_REAL_STRING", realString)
 	Init(EnvPropertySource())
@@ -71,7 +71,7 @@ func TestGetOrDefaultString_GetRealValue(t *testing.T) {
 }
 
 func TestGetOrDefaultString_GetDefaultValue(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	realString := "actualString"
 	Init(EnvPropertySource())
 	testString := GetOrDefaultString("non.existing.env", "defaultString")
@@ -80,13 +80,13 @@ func TestGetOrDefaultString_GetDefaultValue(t *testing.T) {
 }
 
 func TestGetKoanf(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	Init(EnvPropertySource())
 	assert.Equal(t, configInstance.konf, GetKoanf())
 }
 
 func TestCreateCustomPropertySource(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	b := []byte(`{"key": "bytes"}`)
 	bytePropertySource := &PropertySource{
 
@@ -112,7 +112,7 @@ func TestCreateCustomPropertySource(t *testing.T) {
 }
 
 func TestAllPropertiesAreStoredInFlatenMap(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	os.Setenv("UNFLATTEN_ENV", "unflatten_env")
 	defer os.Unsetenv("UNFLATTEN_ENV")
 	InitWithSourcesArray(BasePropertySources(testParams))
@@ -124,7 +124,7 @@ func TestAllPropertiesAreStoredInFlatenMap(t *testing.T) {
 }
 
 func TestCanSetPathToApplicationYamlWithEnvVariable(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	os.Setenv(propertyFilePath, "./testdata/")
 	defer os.Unsetenv(propertyFilePath)
 
@@ -133,7 +133,7 @@ func TestCanSetPathToApplicationYamlWithEnvVariable(t *testing.T) {
 }
 
 func Test_TestEnvOverlapping(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	os.Setenv("DBAAS_AGENT_PORT", "8080")
 	os.Setenv("DBAAS_AGENT_PROTO", "tcp")
 	defer func() {
@@ -150,7 +150,7 @@ func Test_TestEnvOverlapping(t *testing.T) {
 }
 
 func TestCorrectInitializationWithSeveralPropertySources(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	os.Setenv("ENV_VARIABLE", "env")
 	defer os.Unsetenv("ENV_VARIABLE")
 	jsonPropertySource := &PropertySource{
@@ -165,7 +165,7 @@ func TestCorrectInitializationWithSeveralPropertySources(t *testing.T) {
 }
 
 func TestRefreshReturnsErrWhenCalledBeforeInit(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	configInstance.konf = nil
 	err := Refresh()
 	assert.NotNil(t, err)
@@ -174,7 +174,7 @@ func TestRefreshReturnsErrWhenCalledBeforeInit(t *testing.T) {
 }
 
 func TestRefreshAddsNewPropertiesBasedOnEnvVariables(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	envVarKey := "TEST_REFRESH_ADDS_NEW_PROPERTIES"
 	envVarKeyPointDelimeted := "test.refresh.adds.new.properties"
 	envVarValue := "variable-value"
@@ -198,7 +198,7 @@ func TestRefreshAddsNewPropertiesBasedOnEnvVariables(t *testing.T) {
 }
 
 func TestRefreshRewritesPropertiesOnEnvVariables(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	envVarKey := "TEST_REFRESH_REWRITES_PROPERTIES"
 	envVarKeyPointDelimeted := "test.refresh.rewrites.properties"
 	envVarValue := "rewrites-old-value"
@@ -223,7 +223,7 @@ func TestRefreshRewritesPropertiesOnEnvVariables(t *testing.T) {
 }
 
 func TestRefreshDoNotAffectReadOperations(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	InitWithSourcesArray([]*PropertySource{EnvPropertySource()})
 	allKeys := configInstance.konf.Keys()
 
@@ -249,7 +249,7 @@ func TestRefreshDoNotAffectReadOperations(t *testing.T) {
 }
 
 func TestGetKoanfAfterRefreshReturnsDifferentInstance(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	InitWithSourcesArray([]*PropertySource{EnvPropertySource()})
 	konfAfterInit := GetKoanf()
 	err := Refresh()
@@ -259,7 +259,7 @@ func TestGetKoanfAfterRefreshReturnsDifferentInstance(t *testing.T) {
 }
 
 func TestInitOperationSavesStateBetweenIterations(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	checkAbsencePropertyProvider := mockPropertyProvider{readOperation: func(*koanf.Koanf) (map[string]interface{}, error) {
 		assert.Equal(t, "not-init-yet", GetOrDefaultString("test.var", "not-init-yet"))
 		return map[string]interface{}{}, nil
@@ -278,7 +278,7 @@ func TestInitOperationSavesStateBetweenIterations(t *testing.T) {
 }
 
 func TestRefreshOperationSavesStateOnlyAfterAllIterationsOver(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	propertySourceChanged := false
 	overridePropertyProvider := mockPropertyProvider{readOperation: func(*koanf.Koanf) (map[string]interface{}, error) {
 		if propertySourceChanged {
@@ -307,7 +307,7 @@ func TestRefreshOperationSavesStateOnlyAfterAllIterationsOver(t *testing.T) {
 }
 
 func TestReadPropertyInsideFirstStageOfInitNotFails(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	propertyProviderThatDependsOnNotYetReadProperty := mockPropertyProvider{readOperation: func(k *koanf.Koanf) (map[string]interface{}, error) {
 		assert.Equal(t, "default-value", GetOrDefaultString("not.yet.read.property", "default-value"))
 		return map[string]interface{}{}, nil
@@ -316,7 +316,7 @@ func TestReadPropertyInsideFirstStageOfInitNotFails(t *testing.T) {
 }
 
 func TestOldPropertiesStaysOnRefreshFailure(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	err := os.Setenv("INTERESTING_PROPERTY", "old-value")
 	assert.Nil(t, err)
 	defer os.Unsetenv("INTERESTING_PROPERTY")
@@ -343,7 +343,7 @@ func TestOldPropertiesStaysOnRefreshFailure(t *testing.T) {
 
 // Test to check for data race problems by using -race flag
 func TestConfigLoaderInitRaceCondition(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	propertyKey := "test.race.property"
 	envKey := "TEST_RACE_PROPERTY"
 	envValue := "race-sample-value"
@@ -384,7 +384,7 @@ func TestGetOrDefaultStringWithoutInit(t *testing.T) {
 }
 
 func TestParallelInitAndRefreshRaceCondition(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
@@ -405,7 +405,7 @@ func TestParallelInitAndRefreshRaceCondition(t *testing.T) {
 }
 
 func TestConfigLoaderMultipleInitRaceCondition(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	defer cleanupSubscribersRegistry(t)
 	propertyKey := "test.race.property"
 	envKey := "TEST_RACE_PROPERTY"
 	envValue := "race-sample-value"

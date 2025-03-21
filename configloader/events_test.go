@@ -20,6 +20,16 @@ func cleanupSubscribersRegistry() {
 	subscribers.Unlock()
 }
 
+func cleanupSubscribersRegistry2(t *testing.T) {
+	t.Logf("cleanupSubscribersRegistry2 start")
+	subscribers.Lock()
+	for k := range subscribers.registry {
+		delete(subscribers.registry, k)
+	}
+	subscribers.Unlock()
+	t.Logf("cleanupSubscribersRegistry2 finish")
+}
+
 func TestSubscribe_OnInitEvent(t *testing.T) {
 	defer cleanupSubscribersRegistry()
 	var gotEvent1, gotEvent2 Event
@@ -63,9 +73,11 @@ func TestUnsubscribeOnNonExistentHandler(t *testing.T) {
 }
 
 func TestNotifyWhenNoSubscribers(t *testing.T) {
-	defer cleanupSubscribersRegistry()
+	t.Logf("TestNotifyWhenNoSubscribers start")
+	defer cleanupSubscribersRegistry2(t)
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
+	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 
 func TestNotifyNotConflictsWithUnSubscribe(t *testing.T) {

@@ -65,7 +65,7 @@ func TestUnsubscribeOnNonExistentHandler(t *testing.T) {
 func TestNotifyWhenNoSubscribers(t *testing.T) {
 	defer cleanupSubscribersRegistry()
 	assert.Empty(t, subscribers.registry)
-	subscribers.notify(Event{Type: InitedEventT})
+	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
 }
 
 func TestNotifyNotConflictsWithUnSubscribe(t *testing.T) {

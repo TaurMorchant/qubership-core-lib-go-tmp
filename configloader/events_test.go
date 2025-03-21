@@ -69,6 +69,7 @@ func TestNotifyWhenNoSubscribers(t *testing.T) {
 	defer cleanupSubscribersRegistry(t)
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
+	t.Logf("VLLA TestNotifyWhenNoSubscribers events count %v", subscribers.eventsCounter)
 	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 
@@ -123,6 +124,8 @@ func TestDataAtEventParamIsPossible(t *testing.T) {
 		close(over)
 		return nil
 	}
+
+	t.Logf("VLLA TestDataAtEventParamIsPossible events count %v", subscribers.eventsCounter)
 
 	_, err := Subscribe(handlerF)
 	assert.Nil(t, err)

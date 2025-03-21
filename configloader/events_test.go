@@ -172,4 +172,5 @@ func ExampleSubscribe() {
 	if err := Unsubscribe(id); err != nil {
 		// error handling
 	}
+	//
 }

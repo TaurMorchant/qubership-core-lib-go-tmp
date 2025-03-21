@@ -66,7 +66,7 @@ func Init(propertySources ...*PropertySource) {
 	initLock.Lock()
 	inited = true
 	initLock.Unlock()
-	subscribers.notify(Event{Type: InitedEventT})
+	subscribers.notify(Event{Type: InitedEventT, Data: "TMP DATA"})
 }
 
 func IsConfigLoaderInited() bool {

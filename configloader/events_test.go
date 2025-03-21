@@ -70,6 +70,8 @@ func TestNotifyWhenNoSubscribers(t *testing.T) {
 	assert.Empty(t, subscribers.registry)
 	subscribers.notify(Event{Type: InitedEventT, Data: "TestNotifyWhenNoSubscribers"})
 	t.Logf("VLLA TestNotifyWhenNoSubscribers events count %v", subscribers.eventsCounter)
+
+	t.Logf("VLLA TestNotifyWhenNoSubscribers events count AFTER %v", subscribers.eventsCounter)
 	t.Logf("TestNotifyWhenNoSubscribers finish")
 }
 
@@ -119,9 +121,9 @@ func TestDataAtEventParamIsPossible(t *testing.T) {
 			if e.Data != nil {
 				gotData = e.Data.(dataCorrespondsToNotImplementedEventT)
 			}
+			assert.Equal(t, "param-val", gotData.val)
+			close(over)
 		}
-		assert.Equal(t, "param-val", gotData.val)
-		close(over)
 		return nil
 	}
 
